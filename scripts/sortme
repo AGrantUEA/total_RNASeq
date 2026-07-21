@@ -1,0 +1,45 @@
+#Run SortMeRNA
+#Input flags 
+#-i fasta file of reads
+#-r reference fasta file
+#-w workdirectory - defaults to workdir if not set
+#-z if set will recycle index file
+
+workdir=workdir
+recycle=false
+blast=false
+
+
+print_usage() {
+  printf "Usage: ..."
+}
+
+while getopts 'r:i:w:z' flag; do
+  case "${flag}" in
+    i) reads="${OPTARG}" ;;
+    r) ref="${OPTARG}" ;;
+    w) workdir="${OPTARG}" ;;
+    z) recycle=false;;
+    *) print_usage
+       exit 1 ;;
+  esac
+done
+
+echo "SortMeRNA carried out on " $reads "using " $ref "as reference"
+echo "output in " $workdir
+echo $recycle
+
+rm -f $workdir/idx/*
+
+if "$recycle" ; then
+cp -R /gpfs/home/e130/euk_databases/metagenomes/SRR35605365/workdir_old/idx/ $workdir/idx
+fi
+
+rm -f $workdir/kvdb/*
+rm -f $workdir/readb/*
+#verbose output is redirected to sortmeoutfile
+sortmerna  --reads $reads --ref $ref --fastx  --threads 48 -workdir $workdir >sortmeoutfile
+
+
+echo "Total retained reads"
+grep -c '>' $workdir/out/aligned.fa

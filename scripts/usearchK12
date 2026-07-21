@@ -1,0 +1,10 @@
+#runs usearch against KSGP 
+set -o xtrace
+echo "Usearch against KSGP 4.0. Input file:"
+echo $1
+#Using the full KSGP 4.0 database requires a 64 bit implementation of USEARCH. For USEARCH 11 or earlier, the 64 bit implementation is only available in a paid for copy.
+#The most recent version, USEARCH 12, is open source and can be compiled as a 64 bit implementation.
+#maxaccepts and maxrejects set to higher values than defaults.  Sequences pre-selected by SortMeRNA but without matches in KSGP are saved to file usearch_misses.fasta and can be examined manually if desired
+usearch -usearch_local $1 -db $KSGP -threads 48 -strand both -id 0.70 -evalue 1E-1 --userout user.out -userfields query+target+id+alnlen+mism+opens+qlo+qhi+tlo+thi+ql -maxhits 200 -mincols 100 --maxaccepts 2000 --maxrejects 5000 -notmatched usearch_misses.fasta
+ 
+

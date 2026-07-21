@@ -1,0 +1,13 @@
+#Script to carry out LCA on file of USEARCH output in file $1.out
+#Generates file of taxonomic annotations for each read and counts at each taxonomic level from domain to genus
+echo "LCA on " $1
+eval $LCA  -i $1.out -r /gpfs/home/e130/KSGP2/v4_check/final_files/KSGP_plus2.tax -o $1.txt  -LCAfrac 0.8  -cover 0.5 -minAlignLen 60 -id 97,95,93,91,88,78,0
+tail -n +2 $1.txt |wc -l
+tail -n +2 $1.txt |cut -f2 |sort|uniq -c|sort -nr> $1_domain_d.counts
+tail -n +2 $1.txt |cut -f2,3 |sort|uniq -c|sort -nr> $1_phylum_d.counts
+tail -n +2 $1.txt |cut -f2,3,4 |sort|uniq -c|sort -nr> $1_class_d.counts
+tail -n +2 $1.txt |cut -f2,3,4,5 |sort|uniq -c|sort -nr> $1_order_d.counts
+tail -n +2 $1.txt |cut -f2,3,4,5,6 |sort|uniq -c|sort -nr> $1_family_d.counts
+tail -n +2 $1.txt |cut -f2,3,4,5,6,7 |sort|uniq -c|sort -nr> $1_genus_d.counts
+
+

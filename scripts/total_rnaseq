@@ -1,0 +1,65 @@
+#total_rnaseq_process script
+#As described in Grant and Davies, 2026
+#
+#commands needed to set up SortMeRNA; USEARCH 12 and Java (for Trimmomatic) on our local system
+
+module add sortmerna/4.3.6
+module add usearch/12.0-beta1
+module add openjdk/24.0.2 
+
+
+export OMP_NUM_THREADS=48
+#add location of other scripts to $PATH
+export PATH="/gpfs/home/e130/total_RNASeq/scripts:$PATH"
+
+#define locations of read files - example of named R1 and R2 files
+export read1=/gpfs/home/e130/euk_databases/novogene/metagenome/E17w/E17w_EKDN250028608-1A_22WTYLLT4_L3_1.fq.gz
+export read2=/gpfs/home/e130/euk_databases/novogene/metagenome/E17w/E17w_EKDN250028608-1A_22WTYLLT4_L3_2.fq.gz
+
+
+
+#define locations of programs where needed
+export trimmomatic='java -jar /gpfs/home/e130/trimmomatic/trimmomatic-0.36.jar'
+export LCA=/gpfs/home/e130/lotus2//bin//LCA
+export seqkit=/gpfs/home/e130/seqkit2/seqkit
+
+
+# select database to be used by SortMeRNA - in this case the concatenated ncbi SSU and cleaned SorMeRNA SSU sensitive databases
+export sortmedb=/gpfs/home/e130/mtag_test/sortme_plus_ncbi_ssu.fasta
+
+
+#set locationas of KSGP fasta and tax file - this is version 4.0 and the Plus2 taxonomy, which uses accession numbers to identify lineages that do not have resolved taxonomy
+export KSGP=/gpfs/home/e130/KSGP2/v4_check/final_files/remove_lsu_k/out/other.fa
+export KSGPtax=/gpfs/home/e130/KSGP2/v4_check/final_files/KSGP_plus2.tax
+
+
+#quality trim reads and merge paired ends
+echo "fastq files" $read1 $read2
+#################
+merge -1 $read1 -2 $read2
+
+#pre-select SSU reads using SortMeRNA
+###############
+sortme -i tempx.fasta -r $sortmedb -w workdir -z
+
+#search all reads against KSGP
+
+usearchK12 workdir/out/aligned.fa
+
+#Carry out LCA and summarise resules
+LCArun user
+
+
+#remove temporary files
+rm -f temp.fastq
+rm -f tempx.fastq
+rm -f R2_paired.fastq
+rm -f R1_paired.fastq
+rm -f temp.fasta
+rm -f tempx.fasta
+rm -f notmerged_R1.fq
+rm -f notmerged_R2.fq
+rm -f merged.fq
+rm -f user.out
+rm -f R2_unpaired.fastq
+rm -f R1_unpaired.fastq
